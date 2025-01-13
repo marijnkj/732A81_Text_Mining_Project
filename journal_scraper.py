@@ -168,8 +168,8 @@ def scrape_journal_page_urls(start_ind, n_pages, df_journal_overview_urls, heade
 #%% Scrape blogs
 
 def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
-    def write_to_file(blog_texts):
-        with open("blogs.txt", "a", encoding="utf-8") as f:
+    def write_to_file(blog_texts, i):
+        with open(f"blogs.txt", "a", encoding="utf-8") as f:
             for blog_text in blog_texts:
                 f.write(f"{blog_text}\n")
 
@@ -194,7 +194,7 @@ def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
             else:
                 # Try to scrape
                 content_div = this_soup.find("div", {"class": "content"})
-                blog = " ".join([p.text for p in content_div.find_all("p")]).replace("\n", " ")
+                blog = " ".join([p.text for p in content_div.find_all("p")])
                 blog_texts.append(blog)
     except AttributeError as e:
         # Otherwise likely Error 429: Too many requests
@@ -204,7 +204,8 @@ def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
         print(e)
     
         # Append what was found to file and sleep a bit before starting again
-        write_to_file(blog_texts)
+        pd.DataFrame(blog_texts, columns=["blog"]).to_csv(f"blog_{i}.csv")
+        # write_to_file(blog_texts)z
 
         # Sleep for a bit, then start where we left off
         print(f"Sleeping 10 minutes... ({datetime.now()})")
@@ -218,7 +219,8 @@ def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
         print(e)
 
         # Append what was found to file and sleep a bit before starting again
-        write_to_file(blog_texts)
+        pd.DataFrame(blog_texts, columns=["blog"]).to_csv(f"blog_{i}.csv")
+        # write_to_file(blog_texts)
 
         # Sleep for a bit, then start where we left off
         print(f"Sleeping 30 minutes... ({datetime.now()})")
@@ -231,7 +233,8 @@ def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
         print(this_page)
 
         # Append what was found to file and sleep a bit before starting again
-        write_to_file(blog_texts)
+        pd.DataFrame(blog_texts, columns=["blog"]).to_csv(f"blog_{i}.csv")
+        # write_to_file(blog_texts)
         raise e
 
     # If no issues, write urls to file
@@ -239,5 +242,5 @@ def scrape_blog_texts(start_ind, n_pages, df_journal_page_urls, header=header):
 
 
 df_journal_page_urls = pd.read_csv("journal_page_urls.txt", header=None, names=["URL"])
-scrape_blog_texts(2363, len(df_journal_page_urls.index), df_journal_page_urls, header)
+scrape_blog_texts(5855, len(df_journal_page_urls.index), df_journal_page_urls, header)
 #%%
